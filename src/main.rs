@@ -1,37 +1,45 @@
-use std::io::Read;
 use std::{env, fs, io};
 use std::collections::HashMap;
-use std::str::FromStr;
 
 struct Todo {
     list_map: HashMap<String, bool>
 }
 impl Todo {
     fn new () -> Result<Todo, io::Error> {
-        let mut file = fs::OpenOptions::new().write(true).create(true).read(true).open("db.txt")?;
-        let mut content = String::new();
+        let file = fs::OpenOptions::new().write(true).create(true).read(true).open("db.json")?;
+        //let mut content = String::new();
 
-        file.read_to_string(&mut content)?;
-        let list_map: HashMap<String, bool> = content
-            .lines()
-            .map(|line| line.split(" -> ").collect::<Vec<&str>>())
-            .map(|vec| (String::from(vec[0]), bool::from_str(vec[1]).unwrap()))
-            .collect();
+        // file.read_to_string(&mut content)?;
+        // let list_map: HashMap<String, bool> = content
+        //     .lines()
+        //     .map(|line| line.split(" -> ").collect::<Vec<&str>>())
+        //     .map(|vec| (String::from(vec[0]), bool::from_str(vec[1]).unwrap()))
+        //     .collect();
 
-        Ok(Todo { list_map })
+        match serde_json::from_reader(file) {
+            Ok(list_map) => Ok(Todo { list_map }),
+            Err(e) if e.is_eof() => Ok(Todo { list_map: HashMap::new() }),
+            Err(e) => panic!("An error occurred: {}", e)
+        }
+        
     }
 
     fn add_task (&mut self, key: String) {
         self.list_map.insert(key, true);
     }
-    fn save (&self) -> Result<(), io::Error> {
-        let mut result = String::new();
+    fn save (&self) -> Result<(), Box<dyn std::error::Error>> {
+        let f = std::fs::OpenOptions::new().write(true).create(true).open("db.json")?;
+        
+        serde_json::to_writer_pretty(f, &self.list_map)?;
+        Ok(())
 
-        for (key, val) in self.list_map.iter() {
-            let record = format!("{} -> {}\n", key, val);
-            result.push_str(&record);
-        }
-        fs::write("db.txt", result)
+        // let mut result = String::new();
+
+        // for (key, val) in self.list_map.iter() {
+        //     let record = format!("{} -> {}\n", key, val);
+        //     result.push_str(&record);
+        // }
+        // fs::write("db.txt", result)
     }
     fn done_task (&mut self, key: &String) -> Option<()> {
         match self.list_map.get_mut(key) {
