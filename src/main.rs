@@ -21,7 +21,7 @@ impl Todo {
         Ok(Todo { list_map })
     }
 
-    fn add (&mut self, key: String) {
+    fn add_task (&mut self, key: String) {
         self.list_map.insert(key, true);
     }
     fn save (&self) -> Result<(), io::Error> {
@@ -33,6 +33,12 @@ impl Todo {
         }
         fs::write("db.txt", result)
     }
+    fn done_task (&mut self, key: &String) -> Option<()> {
+        match self.list_map.get_mut(key) {
+            Some(val) => Some(*val = false),
+            None => None
+        }
+    }
 }
 fn main() {
     let action = env::args().nth(1).expect("Need some action");
@@ -41,13 +47,21 @@ fn main() {
     let mut todo = Todo::new().unwrap();
 
     if action == "add" {
-        todo.add(item);
+        todo.add_task(item.clone());
 
         match todo.save() {
             Ok(_) => println!("Success save"),
             Err(_) => println!("Error save")
         };
 
-    };
+    } else if action == "done" {
+        match todo.done_task(&item) {
+            Some(_) => match todo.save() {
+                Ok(_) => println!("Success save"),
+                Err(_) => println!("Error save")
+            },
+            None => println!("The task completed unsuccessful")
+        };
+    }
     
 }
