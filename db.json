@@ -1,4 +1,6 @@
-{
-  "item": true,
-  "item2": false
-}
+[
+  "item -> false",
+  "item3 -> false",
+  "item2 -> false",
+  "item4 -> false"
+]

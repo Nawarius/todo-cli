@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 serde_json = "1.0.83"
+fltk = "^1.3"
+
