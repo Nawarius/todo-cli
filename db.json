@@ -1,6 +1,6 @@
 [
-  "item -> false",
-  "item3 -> false",
-  "item2 -> false",
-  "item4 -> false"
+  "item -> Not Done",
+  "item2 -> Done",
+  "item3 -> Not Done",
+  "item4 -> Not Done"
 ]
