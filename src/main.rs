@@ -1,5 +1,5 @@
 use std::{fs, io};
-use fltk::{app, prelude::*, window::Window, button::Button, frame, group, input};
+use fltk::{app, prelude::*, window::Window, button::Button, frame::Frame, group, input};
 use serde_json;
 
 #[derive(Debug, Clone)]
@@ -50,45 +50,156 @@ impl Todo {
 }
 static mut todo: Todo = Todo { list_map: vec![]};
 
-fn main() {
-    unsafe { todo = Todo::new().unwrap(); }
 
-    let app = app::App::default();
-    let mut wind = Window::new(100, 100, 800, 600, "Hello from rust");
-    let mut _frame = frame::Frame::default();
+#[derive(Copy, Clone)]
+enum TaskMessage {
+    Done(&'static str),
+    Reset(&'static str),
+}
+struct ToDoApp {
+    app: app::App,
+    window: Window,
+    receiver: app::Receiver<TaskMessage>,
+    sender: app::Sender<TaskMessage>,
+    list_map: Vec<String>,
+    frame_map: Vec<(String, Frame)>
+}
 
-    let mut offset = 40;
+static mut TaskVec: Vec<String> = vec![];
+static mut FrameVec: Vec<(String, Frame)> = vec![];
 
-unsafe {
-    for task in todo.list_map.iter() {
-        let task = task.split(" -> ").collect::<Vec<&str>>()[0];
+impl ToDoApp {
+    fn new() -> Self {
+        let file = fs::OpenOptions::new().write(true).create(true).read(true).open("db.json").unwrap();
 
-        let flex = group::Flex::default().with_size(800, 30).with_pos(0, offset).row();
+        let list_map = match serde_json::from_reader(file) {
+            Ok(list_map) => list_map,
+            Err(e) => vec![],
+        };
+        
+        let app = app::App::default();
+        let (sender, receiver) = app::channel();
+        let window = Window::default().with_size(800, 600).with_label("App");
+        
+        Self {
+            app,
+            window,
+            sender,
+            receiver,
+            list_map,
+            frame_map: vec![]
+        }
+    }
 
-        let inp = input::Input::default().with_size(300, 50).set_value(task);
-        let mut reset_btn = Button::default().with_size(45, 50).with_label("Reset task");
-        let mut done_btn = Button::default().with_label("Done task");
-        let mut remove_btn = Button::default().with_size(45, 50).with_label("Remove");
+    unsafe fn view (&mut self) {
+        TaskVec = self.list_map.iter().map(|s| s.to_string()).collect::<Vec<String>>();
 
-        done_btn.set_callback(|_| { 
-            todo.done_task(&task.to_string());
-        });
-        reset_btn.set_callback(|_| { 
-            todo.reset_task(&task.to_string());
-        });
+        let mut offset = 40;
 
-        flex.end();
+        for task in TaskVec.iter() {
+            let vec: Vec<&str> = task.split(" -> ").collect();
+            let task = vec[0];
+            let res = vec[1];
 
-        offset += 50;
+            let flex = group::Flex::default().with_size(800, 30).with_pos(0, offset).row();
+
+            let task_name = Frame::default().with_label(task);
+            let task_res = Frame::default().with_label(res);
+
+            self.frame_map.push((task.to_string(), task_res));
+
+            let mut reset_btn = Button::default().with_size(45, 50).with_label("Reset task");
+            let mut done_btn = Button::default().with_label("Done task");
+            let mut remove_btn = Button::default().with_size(45, 50).with_label("Remove");
+
+            done_btn.emit(self.sender, TaskMessage::Done(task));
+            reset_btn.emit(self.sender, TaskMessage::Reset(task));
+
+            flex.end();
+
+            offset += 50;
+        }
+        self.window.end();
+        self.window.show();
+    }
+
+    pub fn run(&mut self) {
+        while self.app.wait() {
+            if let Some(msg) = self.receiver.recv() {
+                match msg {
+                    TaskMessage::Done(key) => {
+                        if let Some((name, frame)) = self.frame_map.iter_mut().find(|(name, fr)| name.contains(key)) {
+                            frame.set_label("Done")
+                        } 
+                        //println!("{}", val);
+                    },
+                    TaskMessage::Reset(key) => {
+                        if let Some((name, frame)) = self.frame_map.iter_mut().find(|(name, fr)| name.contains(key)) {
+                            frame.set_label("Not Done")
+                        } 
+                        //println!("{}", val);
+                    }
+                }
+                //self.frame.set_label(&self.count.to_string());
+            }
+        }
     }
 }
+
+fn main() {
+    unsafe {
+        let mut a = ToDoApp::new();
+        a.view();
+        a.run();
+    }
     
-    wind.end();
-    wind.show();
+    // APP.lock().unwrap().view();
+    // APP.lock().unwrap().run();
+//     unsafe { todo = Todo::new().unwrap(); }
+
+//     let app = app::App::default();
+//     let mut wind = Window::new(100, 100, 800, 600, "Hello from rust");
+//     let mut _frame = frame::Frame::default();
+
+//     let mut offset = 40;
+
+// unsafe {
+//     for task in todo.list_map.iter() {
+//         let vec: Vec<&str> = task.split(" -> ").collect();
+//         let task = vec[0];
+//         let res = vec[1];
+
+//         let flex = group::Flex::default().with_size(800, 30).with_pos(0, offset).row();
+
+//         let task_name = input::Input::default().with_size(300, 50).set_value(task);
+//         let mut task_res = input::Input::default();
+//         task_res.with_size(300, 50).set_value(res);
+//         let mut reset_btn = Button::default().with_size(45, 50).with_label("Reset task");
+//         let mut done_btn = Button::default().with_label("Done task");
+//         let mut remove_btn = Button::default().with_size(45, 50).with_label("Remove");
+
+//         done_btn.set_callback(|_| { 
+//             //btn.emit(sender, msg)
+//             todo.done_task(&task.to_string());
+//             //task_res.set_value("Hmm");
+//         });
+        
+//         reset_btn.set_callback(|_| { 
+//             todo.reset_task(&task.to_string());
+//         });
+
+//         flex.end();
+
+//         offset += 50;
+//     }
+// }
+    
+//     wind.end();
+//     wind.show();
     
     
 
-    app.run().unwrap();
+//     app.run().unwrap();
     
-    println!("End")
+//     println!("End")
 }
