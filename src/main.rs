@@ -69,13 +69,30 @@ static mut TaskVec: Vec<String> = vec![];
 static mut FrameVec: Vec<(String, Frame)> = vec![];
 
 impl ToDoApp {
-    fn new() -> Self {
+    fn read_todo_drom_db () -> Result<Vec<String>, io::Error> {
         let file = fs::OpenOptions::new().write(true).create(true).read(true).open("db.json").unwrap();
 
-        let list_map = match serde_json::from_reader(file) {
-            Ok(list_map) => list_map,
-            Err(e) => vec![],
-        };
+        match serde_json::from_reader(file) {
+            Ok(list_map) => Ok( list_map ),
+            Err(e) if e.is_eof() => Ok( vec![] ),
+            Err(e) => panic!("An error occurred: {}", e)
+        }
+    }
+
+    fn save (&self) -> Result<(), Box<dyn std::error::Error>> {
+        std::fs::write("db.json", serde_json::to_string_pretty(&self.list_map).unwrap())?;
+        Ok(())
+    }
+
+    fn mark_task (&mut self, key: &String, msg: &str) {
+        if let Some(task) = self.list_map.iter_mut().find(|el| el.contains(key)) {
+            *task = format!("{} -> {}", key, msg);
+            self.save();
+        } 
+    }
+
+    fn new () -> Self {
+        let list_map = ToDoApp::read_todo_drom_db().unwrap();
         
         let app = app::App::default();
         let (sender, receiver) = app::channel();
@@ -128,19 +145,22 @@ impl ToDoApp {
             if let Some(msg) = self.receiver.recv() {
                 match msg {
                     TaskMessage::Done(key) => {
-                        if let Some((name, frame)) = self.frame_map.iter_mut().find(|(name, fr)| name.contains(key)) {
-                            frame.set_label("Done")
+                        if let Some((task_name, frame)) = self.frame_map.iter_mut().find(|(name, _)| name.contains(key)) {
+                            frame.set_label("Done");
+
+                            let task_name = task_name.to_string();
+                            self.mark_task(&task_name, "Done");
                         } 
-                        //println!("{}", val);
                     },
                     TaskMessage::Reset(key) => {
-                        if let Some((name, frame)) = self.frame_map.iter_mut().find(|(name, fr)| name.contains(key)) {
-                            frame.set_label("Not Done")
+                        if let Some((task_name, frame)) = self.frame_map.iter_mut().find(|(name, _)| name.contains(key)) {
+                            frame.set_label("Not Done");
+
+                            let task_name = task_name.to_string();
+                            self.mark_task(&task_name, "Not Done");
                         } 
-                        //println!("{}", val);
                     }
                 }
-                //self.frame.set_label(&self.count.to_string());
             }
         }
     }
