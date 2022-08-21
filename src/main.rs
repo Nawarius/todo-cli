@@ -97,7 +97,15 @@ impl ToDoApp {
         if let None = self.list_map.iter().find(|el| el.contains(task_name)) { 
             let task = format!("{} -> Not Done", task_name);
             self.list_map.push(task);
+            self.save();
         } 
+    }
+
+    fn remove_task (&mut self, task_name: &str) {
+        if let Some(index) = self.list_map.iter().position(|el| el.contains(task_name)) {
+            self.list_map.remove(index);
+            self.save();
+        }
     }
 
     fn new () -> Self {
@@ -136,7 +144,8 @@ impl ToDoApp {
 
         let flex_add = Flex::default().with_size(800, 30).with_pos(0, 0).row();
 
-            let add_input = Input::default().with_size(200, 30);
+            let mut add_input = Input::default().with_size(200, 30);
+            add_input.emit(self.sender, TaskMessage::Add());
             self.add_input = add_input;
             
             let mut add_btn = Button::default().with_size(100, 30).with_label("Add task");
@@ -200,8 +209,9 @@ impl ToDoApp {
                         self.add_input.set_value("");
                         self.view();
                     },
-                    TaskMessage::Remove(key) => {
-                        println!("{key}");
+                    TaskMessage::Remove(task_name) => {
+                        self.remove_task(task_name);
+                        self.view();
                     },
                 }
             }
