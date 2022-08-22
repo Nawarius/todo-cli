@@ -72,6 +72,8 @@ impl ToDoApp {
 
                         self.add_input.set_value("");
                         self.view();
+
+                        self.add_input.take_focus();
                     },
                     TaskMessage::Remove(task_name) => {
                         self.remove_task(task_name);
