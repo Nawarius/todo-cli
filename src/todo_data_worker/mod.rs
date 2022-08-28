@@ -18,7 +18,7 @@ pub trait TodoDataWorker {
 
     fn add_task (&mut self, task_name: &str) ;
 
-    fn remove_task (&mut self, task_name: &str);
+    fn remove_task (&mut self, task_name: &str, task_state: &str);
 }
 
 impl TodoDataWorker for ToDoApp {
@@ -38,15 +38,18 @@ impl TodoDataWorker for ToDoApp {
     }
 
     fn add_task (&mut self, task_name: &str) {
-        if let None = self.todo_list.iter().find(|el| el.contains(task_name)) { 
-            let task = format!("{} -> Not Done", task_name);
+        let task = format!("{} -> Not Done", task_name);
+
+        if let None = self.todo_list.iter().find(|el| **el == task) { 
             self.todo_list.push(task);
             self.save();
         } 
     }
 
-    fn remove_task (&mut self, task_name: &str) {
-        if let Some(index) = self.todo_list.iter().position(|el| el.contains(task_name)) {
+    fn remove_task (&mut self, task_name: &str, task_state: &str) {
+        let task = format!("{} -> {}", task_name, task_state);
+
+        if let Some(index) = self.todo_list.iter().position(|el| *el == task) {
             self.todo_list.remove(index);
             self.save();
         }

@@ -28,7 +28,7 @@ impl TodoVisualizer for ToDoApp {
         let scroll_bar = Scroll::default().with_size(800, 600);
 
         let flex_add = Flex::default().with_size(780, 30).with_pos(0, 0).row();
-        
+
             let mut add_input = Input::default();
             add_input.take_focus().unwrap();
             add_input.set_trigger(enums::CallbackTrigger::EnterKey);
@@ -59,7 +59,7 @@ impl TodoVisualizer for ToDoApp {
 
                 done_btn.emit(self.sender, TaskMessage::Done(task));
                 reset_btn.emit(self.sender, TaskMessage::Reset(task));
-                remove_btn.emit(self.sender, TaskMessage::Remove(task));
+                remove_btn.emit(self.sender, TaskMessage::Remove(task, current_state));
 
             flex.end();
 

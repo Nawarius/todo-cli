@@ -11,7 +11,7 @@ use fltk_theme::{WidgetTheme, ThemeType};
 pub enum TaskMessage {
     Done(&'static str),
     Reset(&'static str),
-    Remove(&'static str),
+    Remove(&'static str, &'static str),
     Add(),
 }
 
@@ -59,8 +59,8 @@ impl ToDoApp {
                         self.change_task_state(task_name, "Not Done");
                         self.view();
                     },
-                    TaskMessage::Remove(task_name) => {
-                        self.remove_task(task_name);
+                    TaskMessage::Remove(task_name, task_state) => {
+                        self.remove_task(task_name, task_state);
                         self.view();
                     },
                     TaskMessage::Add() => {
