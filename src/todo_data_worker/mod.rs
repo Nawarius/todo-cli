@@ -12,9 +12,9 @@ pub trait TodoDataWorker {
         }
     }
 
-    fn save (&self) -> Result<(), Box<dyn std::error::Error>>;
+    fn save (&self);
 
-    fn mark_task (&mut self, key: &str, msg: &str);
+    fn change_task_state (&mut self, task_name: &str, task_state: &str);
 
     fn add_task (&mut self, task_name: &str) ;
 
@@ -23,14 +23,16 @@ pub trait TodoDataWorker {
 
 impl TodoDataWorker for ToDoApp {
     
-    fn save (&self) -> Result<(), Box<dyn std::error::Error>> {
-        std::fs::write("db.json", serde_json::to_string_pretty(&self.todo_list).unwrap())?;
-        Ok(())
+    fn save (&self) {
+        std::fs::write(
+            "db.json", 
+            serde_json::to_string_pretty(&self.todo_list).unwrap()
+        ).unwrap();
     }
 
-    fn mark_task (&mut self, key: &str, msg: &str) {
-        if let Some(task) = self.todo_list.iter_mut().find(|el| el.contains(key)) {
-            *task = format!("{} -> {}", key, msg);
+    fn change_task_state (&mut self, task_name: &str, task_state: &str) {
+        if let Some(task) = self.todo_list.iter_mut().find(|el| el.contains(task_name)) {
+            *task = format!("{} -> {}", task_name, task_state);
             self.save();
         } 
     }

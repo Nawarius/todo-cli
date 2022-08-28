@@ -28,13 +28,13 @@ impl TodoVisualizer for ToDoApp {
         let scroll_bar = Scroll::default().with_size(800, 600);
 
         let flex_add = Flex::default().with_size(780, 30).with_pos(0, 0).row();
-
-            let mut add_input = Input::default().with_size(200, 30);
+        
+            let mut add_input = Input::default();
+            add_input.take_focus().unwrap();
             add_input.set_trigger(enums::CallbackTrigger::EnterKey);
             add_input.emit(self.sender, TaskMessage::Add());
-            self.add_input = add_input;
             
-            let mut add_btn = Button::default().with_size(100, 30).with_label("Add task");
+            let mut add_btn = Button::default().with_label("Add task");
             add_btn.emit(self.sender, TaskMessage::Add());
             add_btn.set_frame(widget_themes::OS_DEFAULT_BUTTON_UP_BOX);
 
@@ -47,14 +47,14 @@ impl TodoVisualizer for ToDoApp {
 
             let flex = Flex::default().with_size(780, 30).with_pos(0, offset).row();
 
-                let task_name = Frame::default().with_label(task);
-                let task_state = Frame::default().with_label(current_state);
+                Frame::default().with_label(task);
+                Frame::default().with_label(current_state);
             
-                let mut reset_btn = Button::default().with_size(45, 50).with_label("Reset task");
+                let mut reset_btn = Button::default().with_label("Reset task");
                 reset_btn.set_frame(widget_themes::OS_DEFAULT_BUTTON_UP_BOX);
                 let mut done_btn = Button::default().with_label("Done task");
                 done_btn.set_frame(widget_themes::OS_DEFAULT_BUTTON_UP_BOX);
-                let mut remove_btn = Button::default().with_size(45, 50).with_label("Remove");
+                let mut remove_btn = Button::default().with_label("Remove");
                 remove_btn.set_frame(widget_themes::OS_DEFAULT_BUTTON_UP_BOX);
 
                 done_btn.emit(self.sender, TaskMessage::Done(task));
