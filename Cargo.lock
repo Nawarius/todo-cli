@@ -30,6 +30,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "cocoa-colors"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7fc3439406f349e0bc20d7de87314803378a535190d12e62991f7c8474d5296"
+dependencies = [
+ "cc",
+]
+
+[[package]]
+name = "color-maps"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "120b737cc99b0d73bf0a9bfa6086e84c0bde3b955851f37f812865bc08b35feb"
+dependencies = [
+ "lazy_static",
+]
+
+[[package]]
 name = "crossbeam-channel"
 version = "0.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -73,10 +91,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "fltk-theme"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "abee3d9b0ed8bd45d10e4cc279d757ce71c37224482e8377a99906f7be771266"
+dependencies = [
+ "cocoa-colors",
+ "color-maps",
+ "fltk",
+ "lazy_static",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c8af84674fe1f223a982c933a0ee1086ac4d4052aa0fb8060c12c6ad838e754"
+
+[[package]]
+name = "lazy_static"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "once_cell"
@@ -118,6 +154,7 @@ name = "to-do"
 version = "0.1.0"
 dependencies = [
  "fltk",
+ "fltk-theme",
  "serde_json",
 ]
 

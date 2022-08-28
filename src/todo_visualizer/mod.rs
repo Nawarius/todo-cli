@@ -1,5 +1,6 @@
-use fltk::{prelude::*, text::{TextEditor, TextBuffer}, button::Button, frame::Frame, group::{Flex, Scroll}, input::Input};
+use fltk::{prelude::*, *, button::Button, frame::Frame, group::{Flex, Scroll}, input::Input};
 use crate::{ToDoApp, TaskMessage};
+use fltk_theme::{widget_themes};
 
 static mut TASK_VEC: Vec<String> = vec![];
 
@@ -11,8 +12,6 @@ pub trait TodoVisualizer {
 impl TodoVisualizer for ToDoApp {
 
     fn clear_window (&mut self) {
-        self.frame_map = vec![];
-
         self.window.clear();
         self.window.redraw();
     }
@@ -20,7 +19,7 @@ impl TodoVisualizer for ToDoApp {
     unsafe fn view (&mut self) {
         self.clear_window();
 
-        TASK_VEC = self.list_map.iter().map(|s| s.to_string()).collect::<Vec<String>>();
+        TASK_VEC = self.todo_list.iter().map(|s| s.to_string()).collect::<Vec<String>>();
 
         let mut offset = 40;
 
@@ -31,29 +30,32 @@ impl TodoVisualizer for ToDoApp {
         let flex_add = Flex::default().with_size(780, 30).with_pos(0, 0).row();
 
             let mut add_input = Input::default().with_size(200, 30);
+            add_input.set_trigger(enums::CallbackTrigger::EnterKey);
             add_input.emit(self.sender, TaskMessage::Add());
             self.add_input = add_input;
             
             let mut add_btn = Button::default().with_size(100, 30).with_label("Add task");
             add_btn.emit(self.sender, TaskMessage::Add());
+            add_btn.set_frame(widget_themes::OS_DEFAULT_BUTTON_UP_BOX);
 
         flex_add.end();
 
         for task in TASK_VEC.iter() {
             let vec: Vec<&str> = task.split(" -> ").collect();
             let task = vec[0];
-            let res = vec[1];
+            let current_state = vec[1];
 
             let flex = Flex::default().with_size(780, 30).with_pos(0, offset).row();
 
                 let task_name = Frame::default().with_label(task);
-                let task_res = Frame::default().with_label(res);
+                let task_state = Frame::default().with_label(current_state);
             
-                self.frame_map.push((task.to_string(), task_res));
-
                 let mut reset_btn = Button::default().with_size(45, 50).with_label("Reset task");
+                reset_btn.set_frame(widget_themes::OS_DEFAULT_BUTTON_UP_BOX);
                 let mut done_btn = Button::default().with_label("Done task");
+                done_btn.set_frame(widget_themes::OS_DEFAULT_BUTTON_UP_BOX);
                 let mut remove_btn = Button::default().with_size(45, 50).with_label("Remove");
+                remove_btn.set_frame(widget_themes::OS_DEFAULT_BUTTON_UP_BOX);
 
                 done_btn.emit(self.sender, TaskMessage::Done(task));
                 reset_btn.emit(self.sender, TaskMessage::Reset(task));
