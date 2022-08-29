@@ -16,7 +16,7 @@ pub trait TodoDataWorker {
 
     fn change_task_state (&mut self, task_name: &str, task_state: &str);
 
-    fn add_task (&mut self, task_name: &str) ;
+    fn add_task (&mut self, task_name: &str, task_state: &str);
 
     fn remove_task (&mut self, task_name: &str, task_state: &str);
 }
@@ -37,8 +37,8 @@ impl TodoDataWorker for ToDoApp {
         } 
     }
 
-    fn add_task (&mut self, task_name: &str) {
-        let task = format!("{} -> Not Done", task_name);
+    fn add_task (&mut self, task_name: &str, task_state: &str) {
+        let task = format!("{} -> {}", task_name, task_state);
 
         if let None = self.todo_list.iter().find(|el| **el == task) { 
             self.todo_list.push(task);

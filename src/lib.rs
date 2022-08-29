@@ -68,7 +68,7 @@ impl ToDoApp {
                         let flex_add = Flex::from_widget(scrool.child(0).unwrap());
                         let add_input = Input::from_widget(flex_add.child(0).unwrap());
    
-                        self.add_task(&add_input.value());
+                        self.add_task(&add_input.value(), "Not Done");
                         self.view();
                     }
                 }
