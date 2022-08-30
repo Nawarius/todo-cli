@@ -31,7 +31,10 @@ impl TodoDataWorker for ToDoApp {
     }
 
     fn change_task_state (&mut self, task_name: &str, task_state: &str) {
-        if let Some(task) = self.todo_list.iter_mut().find(|el| el.contains(task_name)) {
+        let prev_task_state = if task_state == "Done" { "Not Done" } else { "Done" };
+        let prev_task = format!("{} -> {}", task_name, prev_task_state);
+        
+        if let Some(task) = self.todo_list.iter_mut().find(|el| **el == prev_task) {
             *task = format!("{} -> {}", task_name, task_state);
             self.save();
         } 

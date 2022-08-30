@@ -53,15 +53,12 @@ impl ToDoApp {
                 match msg {
                     TaskMessage::Done(task_name) => {
                         self.change_task_state(task_name, "Done");
-                        self.view();
                     },
                     TaskMessage::Reset(task_name) => {
                         self.change_task_state(task_name, "Not Done");
-                        self.view();
                     },
                     TaskMessage::Remove(task_name, task_state) => {
                         self.remove_task(task_name, task_state);
-                        self.view();
                     },
                     TaskMessage::Add() => {
                         let scrool = Scroll::from_widget(self.window.child(0).unwrap());
@@ -69,9 +66,9 @@ impl ToDoApp {
                         let add_input = Input::from_widget(flex_add.child(0).unwrap());
    
                         self.add_task(&add_input.value(), "Not Done");
-                        self.view();
                     }
-                }
+                };
+                self.view();
             }
         }
     }

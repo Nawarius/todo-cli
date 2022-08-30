@@ -19,7 +19,7 @@ impl TodoVisualizer for ToDoApp {
     unsafe fn view (&mut self) {
         self.clear_window();
 
-        TASK_VEC = self.todo_list.iter().map(|s| s.to_string()).collect::<Vec<String>>();
+        TASK_VEC = self.todo_list.clone();
 
         let mut offset = 40;
 
